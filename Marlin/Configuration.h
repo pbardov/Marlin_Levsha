@@ -89,6 +89,7 @@
 #ifndef MOTHERBOARD
   #define MOTHERBOARD BOARD_RURAMPS4D_13
   #define VER_WITH_THERMOCOUPLE
+  #define DUE_HWSPI_EXTRA
 #endif
 
 /**
