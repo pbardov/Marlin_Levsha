@@ -91,3 +91,6 @@ void spiSend(uint32_t chan, const uint8_t *buf, size_t n);
 
 // Read single byte from specified SPI channel
 uint8_t spiRec(uint32_t chan);
+
+void spiChipSelect();
+void spiChipDeselect();

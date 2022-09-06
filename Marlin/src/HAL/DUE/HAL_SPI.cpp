@@ -37,6 +37,7 @@
 
 #include "../../inc/MarlinConfig.h"
 #include "../shared/Delay.h"
+#include <SPI.h>
 
 // ------------------------
 // Public functions
@@ -755,6 +756,9 @@
      *  display to use software SPI.
      */
 
+    static SPISettings sdSpiSettings = SPISettings(F_CPU / 21, MSBFIRST, SPI_MODE3);
+    static bool spiInitialized = false;
+
     void spiInit(uint8_t spiRate=6) {  // Default to slowest rate if not specified)
                                        // Also sets U8G SPI rate to 4MHz and the SPI mode to 3
 
@@ -762,35 +766,49 @@
       constexpr int spiDivider[] = { 10, 21, 42, 84, 168, 255, 255 };
       if (spiRate > 6) spiRate = 1;
 
-      // Enable PIOA and SPI0
-      REG_PMC_PCER0 = (1UL << ID_PIOA) | (1UL << ID_SPI0);
+      if (!spiInitialized) {
+        spiInitialized = true;
+        // SPI.begin(4);
+        SPI.begin();
+        SPI.setClockDivider(spiDivider[spiRate]);
+        SPI.setDataMode(SPI_MODE_3_DUE_HW);
+        SPI.begin(10);
+        SPI.setClockDivider(10, spiDivider[1]);
+        SPI.setDataMode(10, SPI_MODE_3_DUE_HW);
+      }
 
-      // Disable PIO on A26 and A27
-      REG_PIOA_PDR = 0x0C000000;
-      OUT_WRITE(SDSS, HIGH);
+      // // SPI.setClockDivider(spiDivider[spiRate]);
+      // // SPI.setDataMode(SPI_MODE3);
+      // // Enable PIOA and SPI0
+      // REG_PMC_PCER0 = (1UL << ID_PIOA) | (1UL << ID_SPI0);
 
-      // Reset SPI0 (from sam lib)
-      SPI0->SPI_CR = SPI_CR_SPIDIS;
-      SPI0->SPI_CR = SPI_CR_SWRST;
-      SPI0->SPI_CR = SPI_CR_SWRST;
-      SPI0->SPI_CR = SPI_CR_SPIEN;
+      // // Disable PIO on A26 and A27
+      // REG_PIOA_PDR = 0x0C000000;
+      // OUT_WRITE(SDSS, HIGH);
 
-      // TMC2103 compatible setup
-      // Master mode, no fault detection, PCS bits in data written to TDR select CSR register
-      SPI0->SPI_MR = SPI_MR_MSTR | SPI_MR_PS | SPI_MR_MODFDIS;
-      // SPI mode 3, 8 Bit data transfer, baud rate
-      SPI0->SPI_CSR[3] = SPI_CSR_SCBR(spiDivider[spiRate]) | SPI_CSR_CSAAT | SPI_MODE_3_DUE_HW;  // use same CSR as TMC2130
-      SPI0->SPI_CSR[0] = SPI_CSR_SCBR(spiDivider[1]) | SPI_CSR_CSAAT | SPI_MODE_3_DUE_HW;  // U8G default to 4MHz
+      // // Reset SPI0 (from sam lib)
+      // SPI0->SPI_CR = SPI_CR_SPIDIS;
+      // SPI0->SPI_CR = SPI_CR_SWRST;
+      // SPI0->SPI_CR = SPI_CR_SWRST;
+      // SPI0->SPI_CR = SPI_CR_SPIEN;
+
+      // // TMC2103 compatible setup
+      // // Master mode, no fault detection, PCS bits in data written to TDR select CSR register
+      // SPI0->SPI_MR = SPI_MR_MSTR | SPI_MR_PS | SPI_MR_MODFDIS;
+      // // SPI mode 3, 8 Bit data transfer, baud rate
+      // SPI0->SPI_CSR[3] = SPI_CSR_SCBR(spiDivider[spiRate]) | SPI_CSR_CSAAT | SPI_MODE_3_DUE_HW;  // use same CSR as TMC2130
+      // SPI0->SPI_CSR[0] = SPI_CSR_SCBR(spiDivider[1]) | SPI_CSR_CSAAT | SPI_MODE_3_DUE_HW;  // U8G default to 4MHz
     }
 
     void spiBegin() { spiInit(); }
 
-    static uint8_t spiTransfer(uint8_t data) {
-      WHILE_TX(0);
-      SPI0->SPI_TDR = (uint32_t)data | 0x00070000UL;  // Add TMC2130 PCS bits to every byte (use SPI0->SPI_CSR[3])
-      WHILE_TX(0);
-      WHILE_RX(0);
-      return SPI0->SPI_RDR;
+    static uint8_t spiTransfer(uint8_t data, SPITransferMode mode = SPI_CONTINUE) {
+      return SPI.transfer(10, data, mode);
+      // WHILE_TX(0);
+      // SPI0->SPI_TDR = (uint32_t)data | 0x00070000UL;  // Add TMC2130 PCS bits to every byte (use SPI0->SPI_CSR[3])
+      // WHILE_TX(0);
+      // WHILE_RX(0);
+      // return SPI0->SPI_RDR;
     }
 
     uint8_t spiRec() { return (uint8_t)spiTransfer(0xFF); }
@@ -811,6 +829,16 @@
       spiTransfer(token);
       for (uint16_t i = 0; i < 512; i++)
         spiTransfer(buf[i]);
+    }
+
+    void spiChipSelect() {
+      SPI.beginTransaction(10, sdSpiSettings);
+      spiTransfer(0xFF, SPI_CONTINUE);
+    }
+
+    void spiChipDeselect() {
+      spiTransfer(0xFF, SPI_LAST);
+      SPI.endTransaction();
     }
 
   #endif // !ALLIGATOR

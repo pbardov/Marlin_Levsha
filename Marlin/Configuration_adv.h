@@ -1458,7 +1458,22 @@
   #endif
 #endif
 
+#define SD_DETECT_PIN 59
+
+// #define BOARD_INIT()    \
+// do {                    \
+//   OUT_WRITE(4, HIGH);   \
+//   OUT_WRITE(10, HIGH);  \
+//   OUT_WRITE(52, HIGH);  \
+//   OUT_WRITE(14, HIGH);   \
+//   OUT_WRITE(15, HIGH);   \
+//   SET_INPUT_PULLDOWN(59);  \
+// } while (0)
+
 #if ENABLED(SDSUPPORT)
+
+  #define DEBUG_CARDREADER
+
   /**
    * SD Card SPI Speed
    * May be required to resolve "volume init" errors.
@@ -1468,7 +1483,7 @@
    *
    * :['SPI_HALF_SPEED', 'SPI_QUARTER_SPEED', 'SPI_EIGHTH_SPEED']
    */
-  //#define SD_SPI_SPEED SPI_HALF_SPEED
+  // #define SD_SPI_SPEED SPI_HALF_SPEED
 
   // The standard SD detect circuit reads LOW when media is inserted and HIGH when empty.
   // Enable this option and set to HIGH if your SD cards are incorrectly detected.
@@ -3042,10 +3057,10 @@
    * The default SW SPI pins are defined the respective pins files,
    * but you can override or define them here.
    */
-  //#define TMC_USE_SW_SPI
-  //#define TMC_SW_MOSI       -1
-  //#define TMC_SW_MISO       -1
-  //#define TMC_SW_SCK        -1
+  // #define TMC_USE_SW_SPI
+  // #define TMC_SW_MOSI       SD_MOSI_PIN
+  // #define TMC_SW_MISO       SD_MISO_PIN
+  // #define TMC_SW_SCK        SD_SCK_PIN
 
   // @section tmc/serial
 

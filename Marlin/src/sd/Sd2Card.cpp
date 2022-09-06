@@ -162,11 +162,13 @@ uint32_t DiskIODriver_SPI_SD::cardSize() {
 
 void DiskIODriver_SPI_SD::chipDeselect() {
   extDigitalWrite(chipSelectPin_, HIGH);
-  spiSend(0xFF); // Ensure MISO goes high impedance
+  // spiSend(0xFF); // Ensure MISO goes high impedance
+  spiChipDeselect();
 }
 
 void DiskIODriver_SPI_SD::chipSelect() {
   spiInit(spiRate_);
+  spiChipSelect();
   extDigitalWrite(chipSelectPin_, LOW);
 }
 
