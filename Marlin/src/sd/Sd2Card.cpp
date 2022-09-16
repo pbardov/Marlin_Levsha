@@ -40,6 +40,8 @@
 
 #include "../MarlinCore.h"
 
+#include "../HAL/shared/Delay.h"
+
 #if ENABLED(SD_CHECK_AND_RETRY)
   static bool crcSupported = true;
 
@@ -163,12 +165,12 @@ uint32_t DiskIODriver_SPI_SD::cardSize() {
 void DiskIODriver_SPI_SD::chipDeselect() {
   extDigitalWrite(chipSelectPin_, HIGH);
   // spiSend(0xFF); // Ensure MISO goes high impedance
-  spiChipDeselect();
+  spiEndTransaction();
 }
 
 void DiskIODriver_SPI_SD::chipSelect() {
   spiInit(spiRate_);
-  spiChipSelect();
+  spiBeginTransaction();
   extDigitalWrite(chipSelectPin_, LOW);
 }
 

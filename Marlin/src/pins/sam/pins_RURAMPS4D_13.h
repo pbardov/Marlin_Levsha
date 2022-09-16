@@ -118,6 +118,16 @@
 #define FAN1_PIN                              -1 //8
 #define CONTROLLER_FAN_PIN                    -1
 
+
+#define TEMP_0_CS_PIN   64
+#define TEMP_0_SCK_PIN  48
+#define TEMP_0_MISO_PIN 62
+#define TEMP_0_MOSI_PIN 63
+
+#define TEMP_0_PIN    2
+#define TEMP_1_PIN    6
+#define TEMP_BED_PIN  3
+
 //
 // Temperature Sensors
 //
@@ -161,9 +171,9 @@
 //
 // EEPROM
 //
-#define MARLIN_EEPROM_SIZE                0x8000  // 32K (24lc256)
-#define I2C_EEPROM                                // EEPROM on I2C-0
-//#define EEPROM_SD                               // EEPROM on SDCARD
+// #define MARLIN_EEPROM_SIZE                0x8000  // 32K (24lc256)
+// #define I2C_EEPROM                                // EEPROM on I2C-0
+#define EEPROM_SD                               // EEPROM on SDCARD
 //#define SPI_EEPROM                              // EEPROM on SPI-0
 //#define SPI_CHAN_EEPROM1        ?
 //#define SPI_EEPROM1_CS_PIN      ?
@@ -182,11 +192,11 @@
  *              ------                                ------
  *               EXP1                                  EXP2
  */
-#define EXP1_01_PIN                           62
+#define EXP1_01_PIN                           62 // SO
 #define EXP1_02_PIN                           40
-#define EXP1_03_PIN                           64
+#define EXP1_03_PIN                           64 // CS
 #define EXP1_04_PIN                           63
-#define EXP1_05_PIN                           48
+#define EXP1_05_PIN                           48 // SCK
 #define EXP1_06_PIN                           50
 #define EXP1_07_PIN                           52
 #define EXP1_08_PIN                           53

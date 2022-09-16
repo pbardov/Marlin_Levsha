@@ -2972,6 +2972,9 @@ void Temperature::disable_all_heaters() {
 
 #if HAS_MAX_TC
 
+  #include <SPI.h>
+  SPISettings spiSettingsMAX = SPISettings(F_CPU / 42, MSBFIRST, SPI_MODE3);
+
   #ifndef THERMOCOUPLE_MAX_ERRORS
     #define THERMOCOUPLE_MAX_ERRORS 15
   #endif
@@ -3043,8 +3046,9 @@ void Temperature::disable_all_heaters() {
       #if !HAS_MAXTC_SW_SPI
         // Initialize SPI using the default Hardware SPI bus.
         // FIXME: spiBegin, spiRec and spiInit doesn't work when soft spi is used.
-        spiBegin();
-        spiInit(MAX_TC_SPEED_BITS);
+        // spiBegin();
+        // spiInit(MAX_TC_SPEED_BITS);
+        SPI.beginTransaction(spiSettingsMAX);
       #endif
 
       MAXTC_CS_WRITE(LOW);  // Enable MAXTC
@@ -3052,9 +3056,13 @@ void Temperature::disable_all_heaters() {
 
       // Read a big-endian temperature value without using a library
       for (uint8_t i = sizeof(max_tc_temp); i--;) {
-        max_tc_temp |= TERN(HAS_MAXTC_SW_SPI, max_tc_spi.receive(), spiRec());
+        max_tc_temp |= TERN(HAS_MAXTC_SW_SPI, max_tc_spi.receive(), SPI.transfer(0xFF, i > 0 ? SPI_CONTINUE : SPI_LAST));
         if (i > 0) max_tc_temp <<= 8; // shift left if not the last byte
       }
+
+      #if !HAS_MAXTC_SW_SPI
+        SPI.endTransaction();
+      #endif
 
       MAXTC_CS_WRITE(HIGH);  // Disable MAXTC
     #else

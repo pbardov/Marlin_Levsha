@@ -756,25 +756,31 @@
      *  display to use software SPI.
      */
 
-    static SPISettings sdSpiSettings = SPISettings(F_CPU / 21, MSBFIRST, SPI_MODE3);
-    static bool spiInitialized = false;
+    #ifdef SD_SPI_SPEED
+      #define INIT_SPI_SPEED SD_SPI_SPEED
+    #else
+      #define INIT_SPI_SPEED SPI_FULL_SPEED
+    #endif
+
+    // 8.4 MHz, 4 MHz, 2 MHz, 1 MHz, 0.5 MHz, 0.329 MHz, 0.329 MHz
+    constexpr int spiDivider[] = { 10, 21, 42, 84, 168, 255, 255 };
+
+    static SPISettings sdSpiSettings = SPISettings(F_CPU / spiDivider[INIT_SPI_SPEED], MSBFIRST, SPI_MODE_3_DUE_HW);
+    static uint8_t spiDfltRate = 0xff;
+    static uint8_t spi10Rate = 0xff;
 
     void spiInit(uint8_t spiRate=6) {  // Default to slowest rate if not specified)
                                        // Also sets U8G SPI rate to 4MHz and the SPI mode to 3
-
-      // 8.4 MHz, 4 MHz, 2 MHz, 1 MHz, 0.5 MHz, 0.329 MHz, 0.329 MHz
-      constexpr int spiDivider[] = { 10, 21, 42, 84, 168, 255, 255 };
       if (spiRate > 6) spiRate = 1;
 
-      if (!spiInitialized) {
-        spiInitialized = true;
-        // SPI.begin(4);
-        SPI.begin();
-        SPI.setClockDivider(spiDivider[spiRate]);
-        SPI.setDataMode(SPI_MODE_3_DUE_HW);
-        SPI.begin(10);
-        SPI.setClockDivider(10, spiDivider[1]);
-        SPI.setDataMode(10, SPI_MODE_3_DUE_HW);
+      if (spiDfltRate != SPI_RATE) {
+        spiDfltRate = SPI_RATE;
+        SPI.setClockDivider(spiDivider[SPI_RATE]);
+      }
+      if (spi10Rate != spiRate) {
+        spi10Rate = spiRate;
+        SPI.setClockDivider(10, spiDivider[spiRate]);
+        sdSpiSettings = SPISettings(F_CPU / spiDivider[spiRate], MSBFIRST, SPI_MODE_3_DUE_HW);
       }
 
       // // SPI.setClockDivider(spiDivider[spiRate]);
@@ -800,15 +806,24 @@
       // SPI0->SPI_CSR[0] = SPI_CSR_SCBR(spiDivider[1]) | SPI_CSR_CSAAT | SPI_MODE_3_DUE_HW;  // U8G default to 4MHz
     }
 
-    void spiBegin() { spiInit(); }
+    void spiBegin() { 
+      // Default SPI for TMC2130 and other
+      SPI.begin();
+      SPI.setDataMode(SPI_MODE_3_DUE_HW);
+
+      // SPI (on digital pin 10) for SD Card
+      SPI.begin(10);
+      SPI.setDataMode(10, SPI_MODE_3_DUE_HW);
+      spiInit(); 
+    }
 
     static uint8_t spiTransfer(uint8_t data, SPITransferMode mode = SPI_CONTINUE) {
-      return SPI.transfer(10, data, mode);
-      // WHILE_TX(0);
-      // SPI0->SPI_TDR = (uint32_t)data | 0x00070000UL;  // Add TMC2130 PCS bits to every byte (use SPI0->SPI_CSR[3])
-      // WHILE_TX(0);
-      // WHILE_RX(0);
-      // return SPI0->SPI_RDR;
+      // return SPI.transfer(10, data, mode);
+      WHILE_TX(0);
+      SPI0->SPI_TDR = (uint32_t)data | 0x00070000UL;  // Add TMC2130 PCS bits to every byte (use SPI0->SPI_CSR[3])
+      WHILE_TX(0);
+      WHILE_RX(0);
+      return SPI0->SPI_RDR;
     }
 
     uint8_t spiRec() { return (uint8_t)spiTransfer(0xFF); }
@@ -831,13 +846,11 @@
         spiTransfer(buf[i]);
     }
 
-    void spiChipSelect() {
+    void spiBeginTransaction() {
       SPI.beginTransaction(10, sdSpiSettings);
-      spiTransfer(0xFF, SPI_CONTINUE);
     }
 
-    void spiChipDeselect() {
-      spiTransfer(0xFF, SPI_LAST);
+    void spiEndTransaction() {
       SPI.endTransaction();
     }
 
