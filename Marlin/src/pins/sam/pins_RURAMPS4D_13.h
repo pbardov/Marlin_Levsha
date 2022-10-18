@@ -74,28 +74,28 @@
 #define Z_DIR_PIN                              2
 #define Z_ENABLE_PIN                          31
 #ifndef Z_CS_PIN
-  #define Z_CS_PIN                            10
+  #define Z_CS_PIN                            50
 #endif
 
-#define E0_STEP_PIN                           29
-#define E0_DIR_PIN                            28
-#define E0_ENABLE_PIN                         33
+#define Z2_STEP_PIN                           29
+#define Z2_DIR_PIN                            28
+#define Z2_ENABLE_PIN                         33
+#ifndef Z2_CS_PIN
+  #define Z2_CS_PIN                           52
+#endif
+
+#define E0_STEP_PIN                           22
+#define E0_DIR_PIN                            24
+#define E0_ENABLE_PIN                         26
 #ifndef E0_CS_PIN
-  #define E0_CS_PIN                           14
+  #define E0_CS_PIN                           53
 #endif
 
-#define E1_STEP_PIN                           22
-#define E1_DIR_PIN                            24
-#define E1_ENABLE_PIN                         26
+#define E1_STEP_PIN                           25
+#define E1_DIR_PIN                            23
+#define E1_ENABLE_PIN                         27
 #ifndef E1_CS_PIN
-  #define E1_CS_PIN                           15
-#endif
-
-#define E2_STEP_PIN                           25
-#define E2_DIR_PIN                            23
-#define E2_ENABLE_PIN                         27
-#ifndef E2_CS_PIN
-  #define E2_CS_PIN                           61
+  #define E1_CS_PIN                           61
 #endif
 
 #ifndef Z_MIN_PROBE_PIN
@@ -115,23 +115,32 @@
 #define HEATER_BED_PIN                         7  // BED H1
 
 #define FAN_PIN                                9
-#define FAN1_PIN                               8
+#define FAN1_PIN                              -1 //8
 #define CONTROLLER_FAN_PIN                    -1
+
+
+#define TEMP_0_CS_PIN   64
+#define TEMP_0_SCK_PIN  48
+#define TEMP_0_MISO_PIN 62
+#define TEMP_0_MOSI_PIN 63
+
+#define TEMP_0_PIN    2
+#define TEMP_1_PIN    6
+#define TEMP_BED_PIN  3
 
 //
 // Temperature Sensors
 //
-#define TEMP_0_PIN                             0  // ANALOG A0
-#define TEMP_1_PIN                             1  // ANALOG A1
-#define TEMP_2_PIN                             2  // ANALOG A2
-#define TEMP_3_PIN                             3  // ANALOG A3
-#define TEMP_BED_PIN                           4  // ANALOG A4
+// #define TEMP_0_PIN                             0  // ANALOG A0
+// #define TEMP_1_PIN                             1  // ANALOG A1
+// #define TEMP_2_PIN                             3  // ANALOG A2
+// #define TEMP_BED_PIN                           4  // ANALOG A4
 
-// The thermocouple uses Analog pins
-#if ENABLED(VER_WITH_THERMOCOUPLE)                // Defined in Configuration.h
-  #define TEMP_4_PIN                           5  // A5
-  #define TEMP_5_PIN                           6  // A6 (Marlin 2.0 not support)
-#endif
+// // The thermocouple uses Analog pins
+// #if ENABLED(VER_WITH_THERMOCOUPLE)                // Defined in Configuration.h
+//   #define TEMP_4_PIN                           2  // A5
+//   #define TEMP_5_PIN                           6  // A6 (Marlin 2.0 not support)
+// #endif
 
 // SPI for MAX Thermocouple
 /*
@@ -162,9 +171,9 @@
 //
 // EEPROM
 //
-#define MARLIN_EEPROM_SIZE                0x8000  // 32K (24lc256)
-#define I2C_EEPROM                                // EEPROM on I2C-0
-//#define EEPROM_SD                               // EEPROM on SDCARD
+// #define MARLIN_EEPROM_SIZE                0x8000  // 32K (24lc256)
+// #define I2C_EEPROM                                // EEPROM on I2C-0
+#define EEPROM_SD                               // EEPROM on SDCARD
 //#define SPI_EEPROM                              // EEPROM on SPI-0
 //#define SPI_CHAN_EEPROM1        ?
 //#define SPI_EEPROM1_CS_PIN      ?
@@ -183,11 +192,11 @@
  *              ------                                ------
  *               EXP1                                  EXP2
  */
-#define EXP1_01_PIN                           62
+#define EXP1_01_PIN                           62 // SO
 #define EXP1_02_PIN                           40
-#define EXP1_03_PIN                           64
+#define EXP1_03_PIN                           64 // CS
 #define EXP1_04_PIN                           63
-#define EXP1_05_PIN                           48
+#define EXP1_05_PIN                           48 // SCK
 #define EXP1_06_PIN                           50
 #define EXP1_07_PIN                           52
 #define EXP1_08_PIN                           53
@@ -195,7 +204,7 @@
 #define EXP2_01_PIN                           74  // MISO
 #define EXP2_02_PIN                           76  // SCK
 #define EXP2_03_PIN                           44
-#define EXP2_04_PIN                           10
+#define EXP2_04_PIN                            4
 #define EXP2_05_PIN                           42
 #define EXP2_06_PIN                           75  // MOSI
 #define EXP2_07_PIN                           51
