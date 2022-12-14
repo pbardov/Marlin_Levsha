@@ -74,21 +74,21 @@
 #define Z_DIR_PIN                              2
 #define Z_ENABLE_PIN                          31
 #ifndef Z_CS_PIN
-  #define Z_CS_PIN                            50
+  #define Z_CS_PIN                            10
 #endif
 
 #define Z2_STEP_PIN                           29
 #define Z2_DIR_PIN                            28
 #define Z2_ENABLE_PIN                         33
 #ifndef Z2_CS_PIN
-  #define Z2_CS_PIN                           52
+  #define Z2_CS_PIN                           14
 #endif
 
 #define E0_STEP_PIN                           22
 #define E0_DIR_PIN                            24
 #define E0_ENABLE_PIN                         26
 #ifndef E0_CS_PIN
-  #define E0_CS_PIN                           53
+  #define E0_CS_PIN                           15
 #endif
 
 #define E1_STEP_PIN                           25
